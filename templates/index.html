@@ -65,6 +65,18 @@
         color: white;
         font-size: 16px;
     }
+        #micBtn {
+        margin-left: 8px;
+        padding: 12px 16px;
+        border-radius: 20px;
+        border: none;
+        background: #444;
+        color: white;
+        font-size: 18px;
+    }
+    #micBtn.listening {
+        background: #c33;
+    }
 </style>
 </head>
 <body>
@@ -74,6 +86,7 @@
 
 <div id="inputArea">
     <input id="textInput" type="text" placeholder="Message Max..." autocomplete="off">
+    <button id="micBtn">🎤</button>
     <button id="sendBtn">Send</button>
 </div>
 
@@ -126,6 +139,32 @@ sendBtn.addEventListener("click", sendMessage);
 textInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") sendMessage();
 });
+
+const micBtn = document.getElementById("micBtn");
+let recognition = null;
+
+if ("webkitSpeechRecognition" in window) {
+    recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript;
+        textInput.value = spokenText;
+        sendMessage();
+    };
+
+    recognition.onend = () => {
+        micBtn.classList.remove("listening");
+    };
+
+    micBtn.addEventListener("click", () => {
+        micBtn.classList.add("listening");
+        recognition.start();
+    });
+} else {
+    micBtn.style.display = "none";
+}
 </script>
 
 </body>
