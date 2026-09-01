@@ -158,6 +158,11 @@ if ("webkitSpeechRecognition" in window) {
         micBtn.classList.remove("listening");
     };
 
+    recognition.onerror = (event) => {
+        micBtn.classList.remove("listening");
+        addMessage("Mic error: " + event.error, "max");
+    };
+
     micBtn.addEventListener("click", () => {
         micBtn.classList.add("listening");
         recognition.start();
