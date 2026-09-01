@@ -73,15 +73,15 @@ def generate_image(prompt):
     url = f"https://image.pollinations.ai/prompt/{requests.utils.quote(prompt)}"
 
     try:
-        response = requests.get(url, timeout=30)
-
-        if response.status_code != 200:
-            return None
-
         image_path = os.path.join(AUDIO_DIR, f"max_image_{uuid.uuid4().hex}.jpg")
 
-        with open(image_path, "wb") as f:
-            f.write(response.content)
+        with requests.get(url, timeout=30, stream=True) as response:
+            if response.status_code != 200:
+                return None
+
+            with open(image_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
 
         return image_path
 
