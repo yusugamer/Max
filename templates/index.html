@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Max</title>
+<style>
+    body {
+        font-family: -apple-system, sans-serif;
+        background: #111;
+        color: #eee;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    #header {
+        padding: 16px;
+        font-size: 20px;
+        font-weight: bold;
+        border-bottom: 1px solid #333;
+    }
+    #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+    }
+    .msg {
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 80%;
+        line-height: 1.4;
+    }
+    .user {
+        background: #2b5;
+        margin-left: auto;
+        color: white;
+    }
+    .max {
+        background: #333;
+        margin-right: auto;
+    }
+    #inputArea {
+        display: flex;
+        padding: 12px;
+        border-top: 1px solid #333;
+    }
+    #textInput {
+        flex: 1;
+        padding: 12px;
+        border-radius: 20px;
+        border: none;
+        background: #222;
+        color: white;
+        font-size: 16px;
+    }
+    #sendBtn {
+        margin-left: 8px;
+        padding: 12px 20px;
+        border-radius: 20px;
+        border: none;
+        background: #2b5;
+        color: white;
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+
+<div id="header">Max</div>
+<div id="messages"></div>
+
+<div id="inputArea">
+    <input id="textInput" type="text" placeholder="Message Max..." autocomplete="off">
+    <button id="sendBtn">Send</button>
+</div>
+
+<script>
+const messages = document.getElementById("messages");
+const textInput = document.getElementById("textInput");
+const sendBtn = document.getElementById("sendBtn");
+
+function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.className = "msg " + sender;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+async function sendMessage() {
+    const text = textInput.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    textInput.value = "";
+
+    const thinkingDiv = document.createElement("div");
+    thinkingDiv.className = "msg max";
+    thinkingDiv.textContent = "...";
+    messages.appendChild(thinkingDiv);
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text })
+        });
+
+        const data = await res.json();
+
+        thinkingDiv.textContent = data.reply;
+
+        const audio = new Audio(data.audio_url);
+        audio.play();
+
+    } catch (err) {
+        thinkingDiv.textContent = "Something went wrong reaching Max.";
+    }
+}
+
+sendBtn.addEventListener("click", sendMessage);
+textInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
+</script>
+
+</body>
+</html>
